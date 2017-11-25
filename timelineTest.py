@@ -92,6 +92,9 @@ class timelineTest(object):
         self.app.exec_()
 
     def readEDL(self, track, edlfile):
+        '''
+        Read EDL from file and create clips in track
+        '''
         edlFile = open(edlfile)
         for line in edlFile.readlines():
             match = re.match(r"(\d{3})\s+\w+\s+\w+\s+\w+\s+(\d{2}:\d{2}:\d{2}:\d{2}) (\d{2}:\d{2}:\d{2}:\d{2}) (\d{2}:\d{2}:\d{2}:\d{2}) (\d{2}:\d{2}:\d{2}:\d{2})", line)
