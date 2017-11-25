@@ -87,12 +87,6 @@ class timelineTest(object):
         track = timelineTrack()
         self.addTrack(track)
         self.readEDL(track, 'sample.edl')
-        #track.addClip(0, 50)
-        #track.addClip(55, 50)
-
-        #marker = timelineMarker()
-        #marker.setFrame(40)
-        #self.scene.addItem(marker)
 
         self.mainWindow.show()
         self.app.exec_()
