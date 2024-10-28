@@ -6,7 +6,6 @@ Module for testing a timeline
 import sys
 import re
 
-#from PySide import QtGui, QtUiTools, QtCore
 from PySide6.QtWidgets import QApplication, QGraphicsRectItem, QGraphicsScene, QGraphicsLineItem, QGraphicsItemGroup
 from PySide6.QtGui import QColor, QBrush, QPen  # pylint: disable=E0611,C0301
 from PySide6.QtUiTools import QUiLoader # pylint: disable=E0611
@@ -16,9 +15,9 @@ frameWidth = 3
 trackHeight = 40
 
 def tc2frames(timecode, fps):
-    '''
+    """
     Converts from timecode to framecount
-    '''
+    """
     match = re.match(r"(\d{2}):(\d{2}):(\d{2}):(\d{2})", timecode)
     if match is not None:
         hours = int(match.group(1))
@@ -28,9 +27,9 @@ def tc2frames(timecode, fps):
         return frames
 
 class ClipItem(QGraphicsRectItem):
-    '''
+    """
     Item for clips in the timeline
-    '''
+    """
     fill = QBrush(QColor(127, 127, 127), Qt.SolidPattern)
     pen = QPen()
     def __init__(self, startFrame, frames):
@@ -41,17 +40,17 @@ class ClipItem(QGraphicsRectItem):
         self.setPen(self.pen)
 
 
-class Timelinetrack(QGraphicsItemGroup):
-    '''
+class TimelineTrack(QGraphicsItemGroup):
+    """
     Timline track
-    '''
+    """
     def __init__(self):
         QGraphicsItemGroup.__init__(self)
 
     def addClip(self, startFrame, frames):
-        '''
+        """
         Add clip to the track
-        '''
+        """
         clip = ClipItem(startFrame, frames)
         self.scene().addItem(clip)
         self.addToGroup(clip)
@@ -59,26 +58,26 @@ class Timelinetrack(QGraphicsItemGroup):
 
 
 class TimelineMarker(QGraphicsLineItem):
-    '''
+    """
     Line reprensenting the 'cursor'
-    '''
+    """
     def __init__(self):
         QGraphicsLineItem.__init__(self)
         self.setLine(0, 0, 0, trackHeight)
 
     def setFrame(self, frame):
-        '''
+        """
         Move pointer
-        '''
+        """
         trans = self.transform()
         trans.translate(frame*frameWidth, 0)
         self.setTransform(trans)
 
 
 class Timelinetest(object):
-    '''
+    """
     Main Class
-    '''
+    """
     def __init__(self):
         self.app = QApplication.instance()
         if self.app is None:
@@ -88,17 +87,18 @@ class Timelinetest(object):
         self.scene = QGraphicsScene()
         self.mainWindow.graphicsView.setScene(self.scene)
 
-        track = Timelinetrack()
+        track = TimelineTrack()
         self.addTrack(track)
         self.readEDL(track, 'sample.edl')
 
         self.mainWindow.show()
         self.app.exec()
 
-    def readEDL(self, track, edlfile):
-        '''
+    @staticmethod
+    def readEDL(track, edlfile):
+        """
         Read EDL from file and create clips in track
-        '''
+        """
         edlFile = open(edlfile)
         for line in edlFile.readlines():
             match = re.match(r"(\d{3})\s+\w+\s+\w+\s+\w+\s+(\d{2}:\d{2}:\d{2}:\d{2}) (\d{2}:\d{2}:\d{2}:\d{2}) (\d{2}:\d{2}:\d{2}:\d{2}) (\d{2}:\d{2}:\d{2}:\d{2})", line)
@@ -111,9 +111,9 @@ class Timelinetest(object):
         edlFile.close()
 
     def addTrack(self, track):
-        '''
+        """
         Add track to timeline
-        '''
+        """
         self.scene.addItem(track)
 
     """
