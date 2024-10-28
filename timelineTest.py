@@ -7,9 +7,10 @@ import sys
 import re
 
 #from PySide import QtGui, QtUiTools, QtCore
-from PySide.QtGui import QApplication, QGraphicsRectItem, QColor, QBrush, QPen, QGraphicsScene, QGraphicsLineItem, QGraphicsItemGroup # pylint: disable=E0611,C0301
-from PySide.QtUiTools import QUiLoader # pylint: disable=E0611
-from PySide.QtCore import Qt # pylint: disable=E0611
+from PySide6.QtWidgets import QApplication, QGraphicsRectItem, QGraphicsScene, QGraphicsLineItem, QGraphicsItemGroup
+from PySide6.QtGui import QColor, QBrush, QPen  # pylint: disable=E0611,C0301
+from PySide6.QtUiTools import QUiLoader # pylint: disable=E0611
+from PySide6.QtCore import Qt # pylint: disable=E0611
 
 frameWidth = 3
 trackHeight = 40
@@ -26,7 +27,7 @@ def tc2frames(timecode, fps):
         frames = int(match.group(4)) + seconds*fps + minutes*60*fps + hours*60*60*fps
         return frames
 
-class clipItem(QGraphicsRectItem):
+class ClipItem(QGraphicsRectItem):
     '''
     Item for clips in the timeline
     '''
@@ -39,7 +40,8 @@ class clipItem(QGraphicsRectItem):
         self.pen.setWidth(2)
         self.setPen(self.pen)
 
-class timelineTrack(QGraphicsItemGroup):
+
+class Timelinetrack(QGraphicsItemGroup):
     '''
     Timline track
     '''
@@ -50,12 +52,13 @@ class timelineTrack(QGraphicsItemGroup):
         '''
         Add clip to the track
         '''
-        clip = clipItem(startFrame, frames)
+        clip = ClipItem(startFrame, frames)
         self.scene().addItem(clip)
         self.addToGroup(clip)
         return clip
 
-class timelineMarker(QGraphicsLineItem):
+
+class TimelineMarker(QGraphicsLineItem):
     '''
     Line reprensenting the 'cursor'
     '''
@@ -71,7 +74,8 @@ class timelineMarker(QGraphicsLineItem):
         trans.translate(frame*frameWidth, 0)
         self.setTransform(trans)
 
-class timelineTest(object):
+
+class Timelinetest(object):
     '''
     Main Class
     '''
@@ -84,12 +88,12 @@ class timelineTest(object):
         self.scene = QGraphicsScene()
         self.mainWindow.graphicsView.setScene(self.scene)
 
-        track = timelineTrack()
+        track = Timelinetrack()
         self.addTrack(track)
         self.readEDL(track, 'sample.edl')
 
         self.mainWindow.show()
-        self.app.exec_()
+        self.app.exec()
 
     def readEDL(self, track, edlfile):
         '''
@@ -123,4 +127,4 @@ class timelineTest(object):
         return clip
     """
 
-timelineTest()
+Timelinetest()
