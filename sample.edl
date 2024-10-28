@@ -11,15 +11,3 @@ TITLE: edl_plain
 
 004  AX       V     C        00:00:12:12 00:00:22:03 00:00:16:01 00:00:25:17
 * FROM CLIP NAME: MVI_4890_kortyol_jo.MOV
-
-005  AX       NONE  C        00:00:00:00 00:00:06:05 00:00:00:00 00:00:06:05
-* FROM CLIP NAME: MVI_4817_kastely_total_jo.MOV
-
-006  AX       NONE  C        00:00:02:12 00:00:08:04 00:00:06:05 00:00:11:22
-* FROM CLIP NAME: MVI_4833_kastely_udvar_slide.MOV
-
-007  AX       NONE  C        00:00:01:11 00:00:05:15 00:00:11:22 00:00:16:01
-* FROM CLIP NAME: MVI_4825_kastely_udvar_ablak_reverse.MOV
-
-008  AX       NONE  C        00:00:12:12 00:00:22:03 00:00:16:01 00:00:25:17
-* FROM CLIP NAME: MVI_4890_kortyol_jo.MOV

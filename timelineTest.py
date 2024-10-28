@@ -1,17 +1,18 @@
 #!/opt/rv-Linux-x86-64-7.2.1/bin/py-interp
-'''
+"""
 Module for testing a timeline
-'''
+"""
 
 import sys
 import re
 
-from PySide6.QtWidgets import QApplication, QGraphicsRectItem, QGraphicsScene, QGraphicsLineItem, QGraphicsItemGroup
-from PySide6.QtGui import QColor, QBrush, QPen  # pylint: disable=E0611,C0301
-from PySide6.QtUiTools import QUiLoader # pylint: disable=E0611
-from PySide6.QtCore import Qt # pylint: disable=E0611
+from PySide6.QtWidgets import QApplication, QGraphicsRectItem, QGraphicsScene, QGraphicsLineItem, \
+    QGraphicsItemGroup, QGraphicsItem
+from PySide6.QtGui import QColor, QBrush, QPen
+from PySide6.QtUiTools import QUiLoader
+from PySide6.QtCore import Qt, QPointF
 
-frameWidth = 3
+frameWidth = 2
 trackHeight = 40
 
 def tc2frames(timecode, fps):
@@ -32,32 +33,72 @@ class ClipItem(QGraphicsRectItem):
     """
     fill = QBrush(QColor(127, 127, 127), Qt.SolidPattern)
     pen = QPen()
-    def __init__(self, startFrame, frames):
-        QGraphicsRectItem.__init__(self)
-        self.setRect(startFrame*frameWidth, 0, frames*frameWidth, trackHeight)
+    def __init__(self, startFrame, frames, track):
+        self.width = frames * frameWidth
+        self.heightNum = 0
+        self.height = 1
+        super().__init__(0, 0, self.width, trackHeight)
+        self.track = track
+        self.setPos(startFrame * frameWidth, 0)
+        #self.setRect(startFrame*frameWidth, 0, frames*frameWidth, trackHeight)
         self.setBrush(self.fill)
         self.pen.setWidth(2)
         self.setPen(self.pen)
+        self.setAcceptHoverEvents(True)
+        self.setZValue(0)
 
+    # mouse hover event
+    def hoverEnterEvent(self, event):
+        app.instance().setOverrideCursor(Qt.OpenHandCursor)
 
-class TimelineTrack(QGraphicsItemGroup):
+    def hoverLeaveEvent(self, event):
+        app.instance().restoreOverrideCursor()
+
+    # mouse click event
+    def mousePressEvent(self, event):
+        pass
+
+    def mouseMoveEvent(self, event):
+        self.setZValue(1)
+        orig_position = self.scenePos()
+        updated_cursor_x = event.scenePos().x() - event.lastScenePos().x() + orig_position.x()
+        self.setPos(QPointF(updated_cursor_x, orig_position.y()))
+
+    def mouseReleaseEvent(self, event):
+        self.track.checkBorder(self.scenePos(), self.width)
+        self.setZValue(0)
+        # print('x: {0}, y: {1}'.format(self.pos().x(), self.pos().y()))
+
+class TimelineTrack(object):
     """
     Timline track
     """
-    def __init__(self):
-        QGraphicsItemGroup.__init__(self)
+    clips = []
+    def __init__(self, scene):
+        self.scene = scene
 
     def addClip(self, startFrame, frames):
         """
         Add clip to the track
         """
-        clip = ClipItem(startFrame, frames)
-        self.scene().addItem(clip)
-        self.addToGroup(clip)
+        clip = ClipItem(startFrame, frames, self)
+        self.scene.addItem(clip)
+        self.clips.append(clip)
         return clip
 
+    def checkBorder(self, pos, width):
+        min_x = pos.x()
+        max_x = min_x + width
+        for clip in self.clips:
+            clip_min_x = clip.scenePos().x()
+            clip_max_x = clip_min_x + clip.width
+            if clip_min_x < min_x < clip_max_x:
+                print(clip)
+            elif clip_min_x < max_x < clip_max_x:
+                print(clip)
 
-class TimelineMarker(QGraphicsLineItem):
+
+class _TimelineMarker(QGraphicsLineItem):
     """
     Line reprensenting the 'cursor'
     """
@@ -78,6 +119,7 @@ class Timelinetest(object):
     """
     Main Class
     """
+    tracks = []
     def __init__(self):
         self.app = QApplication.instance()
         if self.app is None:
@@ -87,7 +129,7 @@ class Timelinetest(object):
         self.scene = QGraphicsScene()
         self.mainWindow.graphicsView.setScene(self.scene)
 
-        track = TimelineTrack()
+        track = TimelineTrack(self.scene)
         self.addTrack(track)
         self.readEDL(track, 'sample.edl')
 
@@ -100,12 +142,14 @@ class Timelinetest(object):
         Read EDL from file and create clips in track
         """
         edlFile = open(edlfile)
+        count = 0
         for line in edlFile.readlines():
             match = re.match(r"(\d{3})\s+\w+\s+\w+\s+\w+\s+(\d{2}:\d{2}:\d{2}:\d{2}) (\d{2}:\d{2}:\d{2}:\d{2}) (\d{2}:\d{2}:\d{2}:\d{2}) (\d{2}:\d{2}:\d{2}:\d{2})", line)
             if match is not None:
-                editStart = tc2frames(match.group(2), 24)
-                editEnd = tc2frames(match.group(3), 24)
-                editLength = editStart - editEnd
+                count += 1
+                editStart = tc2frames(match.group(4), 24)
+                editEnd = tc2frames(match.group(5), 24)
+                editLength = editEnd - editStart
                 track.addClip(editStart, editLength)
 
         edlFile.close()
@@ -114,17 +158,8 @@ class Timelinetest(object):
         """
         Add track to timeline
         """
-        self.scene.addItem(track)
+        self.tracks.append(track)
 
-    """
-    def addClip(self, startFrame, frames):
-        '''
-        Adds a clip to the timeline
-        '''
-        clip = clipItem(startFrame, frames)
 
-        self.scene.addItem(clip)
-        return clip
-    """
-
+app = QApplication(sys.argv)
 Timelinetest()
