@@ -65,9 +65,15 @@ class ClipItem(QGraphicsRectItem):
         self.setPos(QPointF(updated_cursor_x, orig_position.y()))
 
     def mouseReleaseEvent(self, event):
-        self.track.checkBorder(self.scenePos(), self.width)
+        self.track.checkBorder(self, self.width)
         self.setZValue(0)
         # print('x: {0}, y: {1}'.format(self.pos().x(), self.pos().y()))
+
+    def updateHeight(self, num, maxNum):
+        self.heightNum = num
+        self.height = 1.0 / maxNum
+        self.setRect(0, 0, self.width, self.height * trackHeight)
+        self.setPos(self.scenePos().x(), self.heightNum * self.height * trackHeight)
 
 class TimelineTrack(object):
     """
@@ -86,16 +92,18 @@ class TimelineTrack(object):
         self.clips.append(clip)
         return clip
 
-    def checkBorder(self, pos, width):
-        min_x = pos.x()
+    def checkBorder(self, clip, width):
+        min_x = clip.scenePos().x()
         max_x = min_x + width
-        for clip in self.clips:
-            clip_min_x = clip.scenePos().x()
-            clip_max_x = clip_min_x + clip.width
+        for trackClip in self.clips:
+            clip_min_x = trackClip.scenePos().x()
+            clip_max_x = clip_min_x + trackClip.width
             if clip_min_x < min_x < clip_max_x:
-                print(clip)
+                print(trackClip)
+                trackClip.updateHeight(0, 2)
+                clip.updateHeight(1, 2)
             elif clip_min_x < max_x < clip_max_x:
-                print(clip)
+                print(trackClip)
 
 
 class _TimelineMarker(QGraphicsLineItem):
